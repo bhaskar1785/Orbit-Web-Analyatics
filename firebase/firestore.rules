@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // All analytics data is written by the Admin SDK in Cloud Functions,
+    // which bypasses these rules. The dashboard only needs read access.
+    match /sites/{siteId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /{document=**} {
+        allow read: if signedIn();
+        allow write: if false;
+      }
+    }
+  }
+}
